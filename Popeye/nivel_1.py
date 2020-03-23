@@ -42,7 +42,7 @@ class Nivel_1(object):
 		self.bounds_macetas = [(16, 264, 16, 16), (16, 328, 16, 16)]
 
 		self.cubo = Cubo()
-		self.saco = Saco((330, 160, 20, 20))
+		self.saco = Saco()
 
 		self.cargar_elementos_escenario()
 
