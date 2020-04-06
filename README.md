@@ -7,8 +7,11 @@ En los proyectos más recientes, será necesario descargar la libería PixelSmas
 los recursos del juego. Tal que así:
 
 | - - - Librería
+
 | - - - Recursos
+
             |----- Gráficos
+            
             |----- Étc...
 
 
