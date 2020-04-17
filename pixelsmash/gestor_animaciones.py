@@ -84,3 +84,9 @@ class GestorAnimaciones(object):
 		for i in range(1, _numero_frames + 1):
 			frames.append(cargar_img(_nombre_imagen + " (" + str(i) + ")", _escala))
 		return frames
+
+	def ended_animation(self, _animation, _ended = True):
+		if (self.animacion_actual == _animation and
+			self.terminada == _ended):
+			return True
+		return False
