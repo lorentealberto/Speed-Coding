@@ -1,0 +1,6 @@
+WIDTH = 480
+HEIGHT = 320
+TITLE = "Road Fighter"
+
+
+DIFFICULTY = 5
