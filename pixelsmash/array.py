@@ -32,10 +32,3 @@ class Array(object):
 			_element -- List item to be deleted."""
 	def remove_element(self, _element):
 		self.array.remove(_element)
-
-
-	"""Obtiene el elemento de la lista que se está actualizando actualmente.
-		Devuelve:
-			El elemento de la lista que se está actualizando actualmente."""
-	#def obtener_elemento_actual(self):
-	#	return self.elemento_actual

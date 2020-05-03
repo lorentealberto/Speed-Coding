@@ -1,78 +1,90 @@
-from pixelsmash.animacion import Animacion
-from pixelsmash.funciones import cargar_img
+from pixelsmash.animation import Animation
+from pixelsmash.functions import load_img
 import pygame as py
 
 class Animator(object):
 	"""Object that will serve as an animation container for another superior object."""
 	def __init__(self):
 		self.animations = {}
-		self.current_animation = ""
+		self.currentAnimation = ""
 		
-		self.n_veces = 0
-		self.veces_ahora = 0
+		self.times = 0
+		self.currentTimes = 0
 		
 		self.ended = False
 
-	def render(self, _screen, _bounds, _left_toward = False):
+	def render(self, _screen, _bounds, _facing_left = False):
 		"""Draw the current animation on the screen.
 			Parameters:
 				_screen -- Screen where it will be drawn.
 				_bounds -- Position where it will be drawn.
-				_left_toward -- Flag that indicates if the object is looking
+				_facing_left -- Flag that indicates if the object is looking
 					to the left."""
-		self.animations[self.current_animation].render(_screen, _bounds, _left_toward)
+		self.animations[self.currentAnimation].render(_screen, _bounds, _facing_left)
 
 	def update(self, _dt):
 		"""Update the animation.
 			Parameters:
 				_dt -- Time in milliseconds that has passed since it was called
 					the method for the last time."""
-		if self.n_veces == 0:
-			self.animations[self.current_animation].update(_dt)
+		if self.times == -1:
+			self.animations[self.currentAnimation].update(_dt)
+			if self.animations[self.currentAnimation].ended:
+				self.animations[self.currentAnimation].reset_animation()
 		else:
-			if self.veces_ahora <= self.n_veces:
-				if (self.animations[self.current_animation].frame_actual >= 
-					len(self.animations[self.current_animation].frames) - 1):
-					self.veces_ahora += 1
+			if self.currentTimes < self.times:
+				if self.animations[self.currentAnimation].ended:
+					self.currentTimes += 1
+					self.animations[self.currentAnimation].reset_animation()
 				else:
-					self.animations[self.current_animation].update(_dt)
+					self.animations[self.currentAnimation].update(_dt)	
 			else:
 				self.ended = True
-		
-	def play_animation(self, _animation_name, loop = 0):
+			
+	def play_animation(self, _animation_name, _loop = -1):
 		"""Plays the selected animation as long as the animation
 			selected is not void, whether it is a valid animation or not
 			playing now.
 			Parameters:
-				_animation_name -- Name of the animation to be played."""
-		if self.current_animation != '':
-			#if self.animacion_actual != _nombre_animacion:
-			self.current_animation = _animation_name
-			self.n_veces = loop
-			self.veces_ahora = 0
+				_animation_name -- Name of the animation to be played.
+				_loop -- Number of times the animation will be repeated. Default
+					value of this parameter is -1, that is the animation will be
+					repeated indefinitely."""
+
+		if len(self.animations) > 0:
+			self.animations[self.currentAnimation].stop()
+		
+		if self.currentAnimation != '':
+			self.currentAnimation = _animation_name
 			self.ended = False
-			self.animations[self.current_animation].stop()
+			self.times = _loop
+			self.currentTimes = 0	
 			return self.animations[_animation_name].width, self.animations[_animation_name].height
 
-	def add_animation(self, _animation_name, _frames, _speed, loop = 0):
+	def add_animation(self, _animation_name, _speed, _animation_path, _number_frames, _scale = 1):
 		"""Add a new animation to the instance animation catalog
 			of the object. It puts it as the current animation that you want to play and
 			returns the width and height of the first frame of the animation.
 			Parameters:
 				_animation_name -- Name the animation will have internally.
-				_frames -- List of frames that make up the animation.
 				_speed -- Speed at which you want to play the animation
-			Come back:
+				_animation_path -- Path where animation is.
+				_number_frames -- Animation number of frames
+				_scale -- Animation scale. Default value = 1. It means animation isn't resizing.
+			Return:
 				width -- the width of the first frame of the animation.
 				height -- The height of the first frame of the animation."""
-		self.animations[_animation_name] = Animacion(_animation_name, _frames, _velocidad)
-		self.animacion_actual = _animation_name
-		self.n_veces = loop
-		self.veces_ahora = 0
+		_frames = self.__load_frames(_animation_path, _number_frames, _scale)
+
+		self.animations[_animation_name] = Animation(_animation_name, _frames, _speed)
+
+		self.currentAnimation = _animation_name
+
 		return self.animations[_animation_name].width, self.animations[_animation_name].height
 
-	def load_frames(self, _image_name, _number_frames, _scale = 1):
-		"""Load a list of frames
+	def __load_frames(self, _image_name, _number_frames, _scale = 1):
+		"""[Private Method]
+			Load a list of frames
 			Parameters:
 				_image_name -- The name that the frames have inside the
 					folder. All the frames in it have to be called from the
@@ -84,5 +96,5 @@ class Animator(object):
 					it will escalate."""
 		frames = []
 		for i in range(1, _number_frames + 1):
-			frames.append(cargar_img(_image_name + " (" + str(i) + ")", _scale))
+			frames.append(load_img(_image_name + " (" + str(i) + ")", _scale))
 		return frames
