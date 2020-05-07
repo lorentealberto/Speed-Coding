@@ -5,13 +5,14 @@ import pygame as py
 class Animator(object):
 	"""Object that will serve as an animation container for another superior object."""
 	def __init__(self):
-		self.animations = {}
-		self.currentAnimation = ""
+		self.__animations = {}
+		self.__currentAnimation = ""
 		
-		self.times = 0
-		self.currentTimes = 0
+		self.__times = 0
+		self.__currentTimes = 0
 		
 		self.ended = False
+		self.__updateEnabled = True
 
 	def render(self, _screen, _bounds, _facing_left = False):
 		"""Draw the current animation on the screen.
@@ -20,26 +21,29 @@ class Animator(object):
 				_bounds -- Position where it will be drawn.
 				_facing_left -- Flag that indicates if the object is looking
 					to the left."""
-		self.animations[self.currentAnimation].render(_screen, _bounds, _facing_left)
+		self.__animations[self.__currentAnimation].render(_screen, _bounds, _facing_left)
 
 	def update(self, _dt):
 		"""Update the animation.
 			Parameters:
 				_dt -- Time in milliseconds that has passed since it was called
 					the method for the last time."""
-		if self.times == -1:
-			self.animations[self.currentAnimation].update(_dt)
-			if self.animations[self.currentAnimation].ended:
-				self.animations[self.currentAnimation].reset_animation()
-		else:
-			if self.currentTimes < self.times:
-				if self.animations[self.currentAnimation].ended:
-					self.currentTimes += 1
-					self.animations[self.currentAnimation].reset_animation()
-				else:
-					self.animations[self.currentAnimation].update(_dt)	
+
+		if self.__updateEnabled:
+			if self.__times == -1:
+				self.__animations[self.__currentAnimation].update(_dt)
+				if self.__animations[self.__currentAnimation].isEnded():
+					self.__animations[self.__currentAnimation].reset_animation()
 			else:
-				self.ended = True
+				if self.__currentTimes < self.__times:
+					if self.__animations[self.__currentAnimation].isEnded():
+						self.__currentTimes += 1
+						if self.__currentTimes != self.__times:
+							self.__animations[self.__currentAnimation].reset_animation()
+					else:
+						self.__animations[self.__currentAnimation].update(_dt)	
+				else:
+					self.__ended = True
 			
 	def play_animation(self, _animation_name, _loop = -1):
 		"""Plays the selected animation as long as the animation
@@ -50,16 +54,17 @@ class Animator(object):
 				_loop -- Number of times the animation will be repeated. Default
 					value of this parameter is -1, that is the animation will be
 					repeated indefinitely."""
+		if _animation_name != self.__currentAnimation:
 
-		if len(self.animations) > 0:
-			self.animations[self.currentAnimation].stop()
-		
-		if self.currentAnimation != '':
-			self.currentAnimation = _animation_name
-			self.ended = False
-			self.times = _loop
-			self.currentTimes = 0	
-			return self.animations[_animation_name].width, self.animations[_animation_name].height
+			if len(self.__animations) > 0:
+				self.__animations[self.__currentAnimation].stop()
+			
+			if self.__currentAnimation != _animation_name:
+				self.__currentAnimation = _animation_name
+				self.__ended = False
+				self.__times = _loop
+				self.__currentTimes = 0	
+		return self.__animations[_animation_name].getSize()
 
 	def add_animation(self, _animation_name, _speed, _animation_path, _number_frames, _scale = 1):
 		"""Add a new animation to the instance animation catalog
@@ -76,11 +81,14 @@ class Animator(object):
 				height -- The height of the first frame of the animation."""
 		_frames = self.__load_frames(_animation_path, _number_frames, _scale)
 
-		self.animations[_animation_name] = Animation(_animation_name, _frames, _speed)
+		self.__animations[_animation_name] = Animation(_animation_name, _frames, _speed)
 
-		self.currentAnimation = _animation_name
+		self.__currentAnimation = _animation_name
 
-		return self.animations[_animation_name].width, self.animations[_animation_name].height
+		self.__times = -1
+		self.__ended = False
+
+		return self.__animations[_animation_name].getSize()
 
 	def __load_frames(self, _image_name, _number_frames, _scale = 1):
 		"""[Private Method]
@@ -98,3 +106,21 @@ class Animator(object):
 		for i in range(1, _number_frames + 1):
 			frames.append(load_img(_image_name + " (" + str(i) + ")", _scale))
 		return frames
+
+	def enableUpdating(self, _update = False):
+		self.__updateEnabled = _update
+
+	def animationHasEndedPlaying(self, _animation_name):
+		return self.__isPlaying(_animation_name) and self.__hasEndedPlaying()
+
+	def __isPlaying(self, _animation_name):
+		if self.__currentAnimation == _animation_name:
+			return True
+		return False
+
+	def __hasEndedPlaying(self):
+		return self.__ended
+
+	def resetCurrentAnimation(self):
+		self.__animations[self.__currentAnimation].reset_animation()
+
