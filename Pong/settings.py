@@ -1,0 +1,3 @@
+SWIDTH = 320
+SHEIGHT = 240
+WCAPTION = 'Pong'

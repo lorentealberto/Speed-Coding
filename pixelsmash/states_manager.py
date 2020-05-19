@@ -1,13 +1,15 @@
-class StatesManager(object):
+class PSStatesManager(object):
 	def __init__(self):
 		self.states = []
 		self.current_state = -1
 
 	def update(self, _dt):
-		self.states[self.current_state].update(_dt)
+		if self.current_state != -1:
+			self.states[self.current_state].update(_dt)
 
 	def render(self, _screen):
-		self.states[self.current_state].render(_screen)
+		if self.current_state != -1:
+			self.states[self.current_state].render(_screen)
 
 	def add_state(self, _state, _use_state = True):
 		self.states.append(_state)

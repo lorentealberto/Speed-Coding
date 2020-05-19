@@ -1,11 +1,11 @@
 import pygame as py
 
 
-class MainWindow(object):
+class PSMainWindow(object):
     def __init__(self, _width, _height, _title, _states_manager):
         py.init()
     
-        screen = py.display.set_mode(_width, _height)
+        screen = py.display.set_mode((_width, _height))
         py.display.set_caption(_title)
 
         clear_color = (0, 0, 0)
